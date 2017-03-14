@@ -8,6 +8,9 @@ addons:
       - cmake
     sources:
       - kalakris-cmake
+branches:
+  only:
+    - master
 before_script:
   - grep -q -F 'deb http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' /etc/apt/sources.list || sudo sh -c "echo 'deb http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' >> /etc/apt/sources.list"
   - grep -q -F 'deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' /etc/apt/sources.list || sudo sh -c "echo 'deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' >> /etc/apt/sources.list"
@@ -18,5 +21,4 @@ before_script:
   - sudo pip install cpplint
 script:
   - cpplint --linelength=120 --filter=-whitespace/braces,-whitespace/newline --exclude=bme280.* *.c *.h | if grep "error "; then echo "there's lint error"; exit 1; fi
-  - cmake . && 
-  
+  - cmake . && make
