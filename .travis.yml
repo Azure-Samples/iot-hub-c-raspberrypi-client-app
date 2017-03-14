@@ -1,0 +1,16 @@
+language: c
+compiler: gcc
+sudo: true
+before_script:
+  - grep -q -F 'deb http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' /etc/apt/sources.list || sudo sh -c "echo 'deb http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' >> /etc/apt/sources.list"
+  - grep -q -F 'deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' /etc/apt/sources.list || sudo sh -c "echo 'deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' >> /etc/apt/sources.list"
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FDA6A393E4C2257F
+  - sudo apt-get update
+  - sudo apt-get install -y azure-iot-sdk-c-dev
+  - sudo apt-get install -y cmake
+  - sudo apt-get install python
+  - sudo pip install cpplint
+script:
+  - cpplint *.c *.h | if grep "error "; then echo "there's lint error"; exit 1; fi
+  - cmake .
+  - make
