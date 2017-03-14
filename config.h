@@ -13,4 +13,4 @@
 
 #define CREDENTIAL_PATH "~/.iot-hub"
 
-#endif // CONFIG_H_
+#endif  // CONFIG_H_
