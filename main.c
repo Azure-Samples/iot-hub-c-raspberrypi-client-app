@@ -85,7 +85,7 @@ static void start() {
 }
 
 static void stop() {
-    sendMessages = false;
+    sendingMessage = false;
 }
 
 int deviceMethodCallback(
