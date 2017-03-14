@@ -1,11 +1,18 @@
-#include "wiring.h"
+/*
+* IoT Hub Raspberry Pi C - Microsoft Sample Code - Copyright (c) 2017 - Licensed MIT
+*/
+#include "./wiring.h"
 
 static unsigned int BMEInitMark = 0;
 
 #if SIMULATED_DATA
 int readMessage(int messageId, char *payload)
 {
-    snprintf(payload, sizeof(payload), "{ messageId: %d, temperature: %f, humidity: %f }", messageId, random(20, 30), random(60, 80));
+    snprintf(payload, 
+        sizeof(payload), "{ messageId: %d, temperature: %f, humidity: %f }", 
+        messageId, 
+        random(20, 30), 
+        random(60, 80));
     return 1;
 }
 

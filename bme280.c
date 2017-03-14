@@ -1,3 +1,7 @@
+/*
+* IoT Hub Raspberry Pi C - Microsoft Sample Code - Copyright (c) 2017 - Licensed MIT
+*/
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // bme280.c:
@@ -6,7 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "bme280.h"
+#include "./bme280.h"
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include <stdint.h>
@@ -167,7 +171,7 @@ int bme280_init(int Chip_enable_to_use__i)
   }
 
   #define T_P_CALIB_NUM_BYTES (24)
-  Bytes_read__i = bme280_read(eBME280reg_DIG_T1, (uint8_t *)&Calib_data,
+  Bytes_read__i = bme280_read(eBME280reg_DIG_T1, reinterpret_cast<uint8_t *>(&Calib_data),
     T_P_CALIB_NUM_BYTES);
   if (Bytes_read__i != T_P_CALIB_NUM_BYTES)
   {
@@ -332,7 +336,7 @@ int bme280_read_sensors(float * Temp_c__fp, float * Pres_Pa__fp,
     uint8_t Register__u8 = eBME280reg_PRESDATA;
     int Num_bytes_read__i = bme280_read(Register__u8, Buffer__u8a,
       Num_bytes_to_read__u8);
-    if (Num_bytes_read__i == (int)Num_bytes_to_read__u8)
+    if (Num_bytes_read__i ==  static_cast<int>(Num_bytes_to_read__u8))
     {
       // Decode the fields.
 

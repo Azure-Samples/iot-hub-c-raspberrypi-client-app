@@ -1,3 +1,7 @@
+/*
+* IoT Hub Raspberry Pi C - Microsoft Sample Code - Copyright (c) 2017 - Licensed MIT
+*/
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // bme280.h:
@@ -6,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __BME280_H
-#define __BME280_H
+#ifndef BME280_H_
+#define BME280_H_
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +45,6 @@ int bme280_init(int Chip_enable_to_use__i);
 // Return: If wiringPi gets an error, this will be < 0
 //         If the read attempts fail, this will be 1
 //         If the read succeeds within the available retries, returns 0
-int bme280_read_sensors(float * Temp_C__fp, float * Pres_Pa__fp,
-  float * Hum_pct__fp);
+int bme280_read_sensors(float * Temp_C__fp, float * Pres_Pa__fp, float * Hum_pct__fp);
 
-#endif//__BME280_H
+#endif  // BME280_H_

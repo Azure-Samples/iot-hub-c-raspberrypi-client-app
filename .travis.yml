@@ -11,6 +11,6 @@ before_script:
   - sudo apt-get install python
   - sudo pip install cpplint
 script:
-  - cpplint *.c *.h | if grep "error "; then echo "there's lint error"; exit 1; fi
+  - cpplint --linelength=120 --filter=-whitespace/braces,-whitespace/newline --exclude=bme280.* *.c *.h | if grep "error "; then echo "there's lint error"; exit 1; fi
   - cmake .
   - make
