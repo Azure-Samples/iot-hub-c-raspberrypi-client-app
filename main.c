@@ -17,7 +17,11 @@
 #include "./iothub_message.h"
 #include "./iothubtransportmqtt.h"
 
+const char * onSuccess = "\"Successfully invoke device method\"";
+const char * notFound = "\"No method found\"";
+
 static bool messagePending = false;
+static bool sendingMessage = true;
 
 static void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
@@ -74,6 +78,74 @@ static char *get_device_id(char *str)
     device_id[length] = '\0';
 
     return device_id;
+}
+
+static void start() {
+    sendingMessage = true;
+}
+
+static void stop() {
+    sendMessages = false;
+}
+
+int deviceMethodCallback(
+    const char * methodName, 
+    const unsigned char * payload, 
+    size_t size, 
+    unsigned char** response, 
+    size_t* response_size, 
+    void* userContextCallback)
+{
+    (void)printf("Try to invoke method %s\r\n", methodName);
+    const char * responseMessage = onSuccess;
+    int result = 200;
+    
+    if(strcmp(methodName, "start") == 0)
+    {
+        start();
+    }
+    else if(strcmp(methodName, "stop") == 0)
+    {
+        stop();
+    }
+    else
+    {
+        (void)printf("No method %s found\r\n", methodName);
+        responseMessage = notFound;
+        result = 404;
+    }
+
+    *response_size = strlen(responseMessage);
+    *response = (unsigned char *)malloc(*response_size);
+    strncpy((char *)(*response), responseMessage, *response_size);
+    
+    return result;
+}
+
+IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
+{
+    const unsigned char* buffer = NULL;
+    size_t size = 0;
+
+    if (IOTHUB_MESSAGE_OK != IoTHubMessage_GetByteArray(message, &buffer, &size))
+    {
+        return IOTHUBMESSAGE_ABANDONED;
+    }
+
+    // message needs to be converted to zero terminated string
+    char* temp = malloc(size + 1);
+
+    if (temp == NULL)
+    {
+        return IOTHUBMESSAGE_ABANDONED;
+    }
+
+    strncpy(temp, buffer, size);
+    temp[size] = '\0';
+
+    printf("Receiving message: %s\r\n", temp);
+
+    return IOTHUBMESSAGE_ACCEPTED;
 }
 
 static char *readFile(char *fileName)
@@ -189,10 +261,14 @@ int main(int argc, char *argv[])
                 }
             }
 
+            // set C2D and device method callback
+            IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, receiveMessageCallback, NULL);
+            IoTHubClient_LL_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
+
             int count = 0;
             while (true)
             {
-                if (!messagePending)
+                if (sendingMessage && !messagePending)
                 {
                     ++count;
                     char buffer[BUFFER_SIZE];
