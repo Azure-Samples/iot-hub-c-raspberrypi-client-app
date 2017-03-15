@@ -6,9 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "./config.h"
-#include "./wiring.h"
-
 #include <azure_c_shared_utility/platform.h>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/crt_abstractions.h>
@@ -16,6 +13,9 @@
 #include <iothub_client_options.h>
 #include <iothub_message.h>
 #include <iothubtransportmqtt.h>
+
+#include "./config.h"
+#include "./wiring.h"
 
 const char *onSuccess = "\"Successfully invoke device method\"";
 const char *notFound = "\"No method found\"";
