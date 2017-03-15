@@ -1,0 +1,12 @@
+language: c
+compiler: gcc
+sudo: true
+os: linux
+branches:
+  only:
+    - master
+before_script:
+  - sudo apt-get install python
+  - sudo pip install cpplint
+script:
+  - cpplint --linelength=120 --filter=-whitespace/braces,-whitespace/newline,-readability/casting *.c *.h
