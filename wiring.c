@@ -8,7 +8,8 @@ static unsigned int BMEInitMark = 0;
 #if SIMULATED_DATA
 float random(int min, int max)
 {
-    return min + (float)(rand()) / (float)(max - min);
+    int range = (int)(rand()) / (100 * (max - min));
+    return min + (float)range / 100;
 }
 
 int readMessage(int messageId, char *payload)
