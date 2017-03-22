@@ -24,6 +24,8 @@
 #define BME_INIT 1 << 3
 #endif
 
+#define TEMPERATURE_ALERT 30
+
 int readMessage(int messageId, char *payload);
 void blinkLED();
 void setupWiring();

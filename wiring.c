@@ -8,12 +8,13 @@ static unsigned int BMEInitMark = 0;
 #if SIMULATED_DATA
 int readMessage(int messageId, char *payload)
 {
+    float temperature = random(20, 30);
     snprintf(payload,
              sizeof(payload), "{ messageId: %d, temperature: %f, humidity: %f }",
              messageId,
-             random(20, 30),
+             temperature,
              random(60, 80));
-    return 1;
+    return (temperature > TEMPERATURE_ALERT) ? 1 : 0;
 }
 
 float random(int min, int max)
@@ -73,7 +74,7 @@ int readMessage(int messageId, char *payload)
              messageId,
              temperature,
              humidity);
-    return 1;
+    return temperature > TEMPERATURE_ALERT ? 1 : 0;
 }
 #endif
 
