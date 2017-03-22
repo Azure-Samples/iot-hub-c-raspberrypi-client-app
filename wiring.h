@@ -6,7 +6,7 @@
 #define WIRING_H_
 
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 
