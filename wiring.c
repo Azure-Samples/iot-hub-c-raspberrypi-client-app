@@ -8,7 +8,7 @@ static unsigned int BMEInitMark = 0;
 #if SIMULATED_DATA
 float random(int min, int max)
 {
-    int range = (int)(rand()) % (100 * (max - min));
+    int range = (int)(rand()) / (100 * (max - min));
     return min + (float)range / 100;
 }
 
