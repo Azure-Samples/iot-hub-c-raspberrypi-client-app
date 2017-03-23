@@ -120,8 +120,7 @@ int deviceMethodCallback(
     }
 
     *response_size = strlen(responseMessage);
-    *response = (unsigned char *)
-        (*response_size);
+    *response = (unsigned char *)malloc(*response_size);
     strncpy((char *)(*response), responseMessage, *response_size);
 
     return result;
@@ -138,7 +137,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE me
     }
 
     // message needs to be converted to zero terminated string
-    char *temp = malloc(size + 1);
+    char *temp = (char *)malloc(size + 1);
 
     if (temp == NULL)
     {
