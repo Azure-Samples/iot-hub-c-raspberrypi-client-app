@@ -120,8 +120,7 @@ int deviceMethodCallback(
     }
 
     *response_size = strlen(responseMessage);
-    *response = (unsigned char *)
-        (*response_size);
+    *response = (unsigned char *)malloc(*response_size);
     strncpy((char *)(*response), responseMessage, *response_size);
 
     return result;
