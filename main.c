@@ -120,7 +120,8 @@ int deviceMethodCallback(
     }
 
     *response_size = strlen(responseMessage);
-    *response = (unsigned char *)malloc(*response_size);
+    *response = (unsigned char *)
+        (*response_size);
     strncpy((char *)(*response), responseMessage, *response_size);
 
     return result;
@@ -148,6 +149,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE me
     temp[size] = '\0';
 
     printf("Receiving message: %s\r\n", temp);
+    free(temp);
 
     return IOTHUBMESSAGE_ACCEPTED;
 }
