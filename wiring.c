@@ -6,21 +6,24 @@
 static unsigned int BMEInitMark = 0;
 
 #if SIMULATED_DATA
-int readMessage(int messageId, char *payload)
-{
-    snprintf(payload,
-             sizeof(payload), "{ messageId: %d, temperature: %f, humidity: %f }",
-             messageId,
-             random(20, 30),
-             random(60, 80));
-    return 1;
-}
-
 float random(int min, int max)
 {
-    srand((unsigned int)time(NULL));
-    return min + static_cast<float>(rand_r()) / (static_cast<float>(RAND_MAX * (max - min)));
+    int range = (int)(rand()) % (100 * (max - min));
+    return min + (float)range / 100;
 }
+
+int readMessage(int messageId, char *payload)
+{
+    float temperature = random(20, 30);
+    snprintf(payload,
+             BUFFER_SIZE,
+             "{ messageId: %d, temperature: %f, humidity: %f }",
+             messageId,
+             temperature,
+             random(60, 80));
+    return (temperature > TEMPERATURE_ALERT) ? 1 : 0;
+}
+
 #else
 int mask_check(int check, int mask)
 {
@@ -73,7 +76,7 @@ int readMessage(int messageId, char *payload)
              messageId,
              temperature,
              humidity);
-    return 1;
+    return temperature > TEMPERATURE_ALERT ? 1 : 0;
 }
 #endif
 

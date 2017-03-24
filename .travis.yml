@@ -9,4 +9,4 @@ before_script:
   - sudo apt-get install python
   - sudo pip install cpplint
 script:
-  - cpplint --linelength=120 --filter=-whitespace/braces,-whitespace/newline,-readability/casting *.c *.h
+  - cpplint --linelength=120 --filter=-whitespace/braces,-whitespace/newline,-readability/casting,-runtime/threadsafe_fn *.c *.h

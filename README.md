@@ -21,7 +21,7 @@ You can follow the image to connect your BME280 and a LED with your Raspberry Pi
 ### DON'T HAVE A PHYSICAL BME280?
 You can use the application to simulate temperature&humidity data and send to your IoT hub.
 1. Open the `config.h` file.
-2. Change the `SIMULATED_DATA` value from `false` to `true`.
+2. Change the `SIMULATED_DATA` value from `0` to `1`.
 
 
 ## Running this sample

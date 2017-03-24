@@ -37,7 +37,7 @@ static void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userCon
     messagePending = false;
 }
 
-static void sendMessages(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char *buffer)
+static void sendMessages(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char *buffer, int temperatureAlert)
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray(buffer, strlen(buffer));
     if (messageHandle == NULL)
@@ -46,6 +46,8 @@ static void sendMessages(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char *buffe
     }
     else
     {
+        MAP_HANDLE properties = IoTHubMessage_Properties(messageHandle);
+        Map_Add(properties, "temperatureAlert", (temperatureAlert > 0) ? "true" : "false");
         (void)printf("Sending message: %s\r\n", buffer);
         if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, NULL) != IOTHUB_CLIENT_OK)
         {
@@ -135,7 +137,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE me
     }
 
     // message needs to be converted to zero terminated string
-    char *temp = malloc(size + 1);
+    char *temp = (char *)malloc(size + 1);
 
     if (temp == NULL)
     {
@@ -146,6 +148,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE me
     temp[size] = '\0';
 
     printf("Receiving message: %s\r\n", temp);
+    free(temp);
 
     return IOTHUBMESSAGE_ACCEPTED;
 }
@@ -276,9 +279,10 @@ int main(int argc, char *argv[])
                     char buffer[BUFFER_SIZE];
                     if (buffer != NULL)
                     {
-                        if (readMessage(count, buffer) == 1)
+                        int result = readMessage(count, buffer);
+                        if (result != -1)
                         {
-                            sendMessages(iotHubClientHandle, buffer);
+                            sendMessages(iotHubClientHandle, buffer, result);
                         }
                         else
                         {

@@ -6,7 +6,7 @@
 #define WIRING_H_
 
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 
@@ -23,6 +23,8 @@
 #define SPI_SETUP 1 << 2
 #define BME_INIT 1 << 3
 #endif
+
+#define TEMPERATURE_ALERT 30
 
 int readMessage(int messageId, char *payload);
 void blinkLED();
