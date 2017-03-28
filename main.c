@@ -13,7 +13,7 @@
 #include <iothub_client_options.h>
 #include <iothub_message.h>
 #include <iothubtransportmqtt.h>
-
+#include <jsondecoder.h>
 #include "./config.h"
 #include "./wiring.h"
 
@@ -124,6 +124,40 @@ int deviceMethodCallback(
     strncpy((char *)(*response), responseMessage, *response_size);
 
     return result;
+}
+
+void twinCallback(
+    DEVICE_TWIN_UPDATE_STATE updateState,
+    const unsigned char * payLoad,
+    size_t size,
+    void * userContextCallback
+)
+{
+    char * temp = (char *)malloc(size + 1);
+    for (int i = 0; i < size; i++)
+    {
+        temp[i] = (char)(payLoad[i]);
+    }
+    temp[size] = '\0';
+    printf("receive device twin message: %s", temp);
+    MULTITREE_HANDLE tree = NULL;
+
+    if (JSON_DECODER_OK == JSONDecoder_JSON_To_MultiTree(temp, &tree))
+    {
+        MULTITREE_HANDLE child = NULL;
+
+        if (MULTITREE_OK == MultiTree_GetChildByName(tree, "desired", &child))
+        {
+	    const void * value = NULL;
+            if (MULTITREE_OK == MultiTree_GetLeafValue(child, "interval", &value))
+            {
+                printf("interval  value is : %x\r\n", *(int *)value);
+		printf("Address is 0x%x", (int *)value);
+            }
+        }
+    }
+    MultiTree_Destroy(tree);
+    free(temp);
 }
 
 IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void *userContextCallback)
@@ -269,6 +303,7 @@ int main(int argc, char *argv[])
             // set C2D and device method callback
             IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, receiveMessageCallback, NULL);
             IoTHubClient_LL_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
+            IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, twinCallback, NULL);
 
             int count = 0;
             while (true)
