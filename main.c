@@ -33,7 +33,7 @@ static void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userCon
     }
     else
     {
-        (void)printf("Failed to send message to Azure IoT Hub\r\n");
+        LogError("Failed to send message to Azure IoT Hub");
     }
 
     messagePending = false;
@@ -44,21 +44,21 @@ static void sendMessages(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char *buffe
     IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray(buffer, strlen(buffer));
     if (messageHandle == NULL)
     {
-        (void)printf("Unable to create a new IoTHubMessage\r\n");
+        LogError("Unable to create a new IoTHubMessage");
     }
     else
     {
         MAP_HANDLE properties = IoTHubMessage_Properties(messageHandle);
         Map_Add(properties, "temperatureAlert", (temperatureAlert > 0) ? "true" : "false");
-        (void)printf("Sending message: %s\r\n", buffer);
+        LogInfo("Sending message: %s", buffer);
         if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, messageHandle, sendCallback, NULL) != IOTHUB_CLIENT_OK)
         {
-            (void)printf("Failed to send message to Azure IoT Hub\r\n");
+            LogError("Failed to send message to Azure IoT Hub");
         }
         else
         {
             messagePending = true;
-            (void)printf("Message sent to Azure IoT Hub\r\n");
+            LogInfo("Message sent to Azure IoT Hub");
         }
 
         IoTHubMessage_Destroy(messageHandle);
@@ -102,7 +102,7 @@ int deviceMethodCallback(
     size_t *response_size,
     void *userContextCallback)
 {
-    (void)printf("Try to invoke method %s\r\n", methodName);
+    LogInfo("Try to invoke method %s\r\n", methodName);
     const char *responseMessage = onSuccess;
     int result = 200;
 
@@ -116,7 +116,7 @@ int deviceMethodCallback(
     }
     else
     {
-        (void)printf("No method %s found\r\n", methodName);
+        LogError("No method %s found\r\n", methodName);
         responseMessage = notFound;
         result = 404;
     }
@@ -148,7 +148,7 @@ void twinCallback(
 
         if (MULTITREE_OK != MultiTree_GetChildByName(tree, "desired", &child))
         {
-            LogInfo("This device twin message contains desired message only\r\n");
+            LogInfo("This device twin message contains desired message only");
             child = tree;
         }
         const void *value = NULL;
@@ -182,7 +182,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT receiveMessageCallback(IOTHUB_MESSAGE_HANDLE me
     strncpy(temp, buffer, size);
     temp[size] = '\0';
 
-    printf("Receiving message: %s\r\n", temp);
+    (void)printf("Receiving message: %s\r\n", temp);
     free(temp);
 
     return IOTHUBMESSAGE_ACCEPTED;
@@ -198,7 +198,7 @@ static char *readFile(char *fileName)
 
     if (fp == NULL)
     {
-        (void)printf("ERROR: File %s doesn't exist!\n", fileName);
+        LogError("ERROR: File %s doesn't exist!", fileName);
         return NULL;
     }
 
@@ -212,7 +212,7 @@ static char *readFile(char *fileName)
     if (buffer == NULL)
     {
         fclose(fp);
-        (void)printf("ERROR: Failed to allocate memory.\n");
+        LogError("ERROR: Failed to allocate memory.");
         return NULL;
     }
 
@@ -221,7 +221,7 @@ static char *readFile(char *fileName)
     {
         fclose(fp);
         free(buffer);
-        (void)printf("ERROR: Failed to read the file %s into memory.\n", fileName);
+        LogError("ERROR: Failed to read the file %s into memory.", fileName);
         return NULL;
     }
 
@@ -247,7 +247,7 @@ static bool setX509Certificate(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char 
         IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK ||
         IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
     {
-        (void)printf("ERROR: Failed to set options for x509.\n");
+        LogError("Failed to set options for x509.");
         return false;
     }
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        (void)printf("Usage: %s <IoT hub device connection string>\r\n", argv[0]);
+        LogError("Usage: %s <IoT hub device connection string>", argv[0]);
         return 1;
     }
 
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 
     if (device_id_src == NULL)
     {
-        (void)printf("ERROR: Cannot parse device id from IoT device connection string\n");
+        LogError("Cannot parse device id from IoT device connection string");
         return 1;
     }
     snprintf(device_id, sizeof(device_id), "%s", device_id_src);
@@ -282,13 +282,13 @@ int main(int argc, char *argv[])
 
     if (platform_init() != 0)
     {
-        (void)printf("Failed to initialize the platform.\r\n");
+        LogError("Failed to initialize the platform.");
     }
     else
     {
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(argv[1], MQTT_Protocol)) == NULL)
         {
-            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+            LogError("iotHubClientHandle is NULL!");
         }
         else
         {
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
                         }
                         else
                         {
-                            (void)printf("Failed to read message\r\n");
+                            LogError("Failed to read message");
                         }
                     }
                     delay(interval);
