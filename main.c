@@ -139,7 +139,6 @@ void twinCallback(
         temp[i] = (char)(payLoad[i]);
     }
     temp[size] = '\0';
-    printf("receive device twin message: %s", temp);
     MULTITREE_HANDLE tree = NULL;
 
     if (JSON_DECODER_OK == JSONDecoder_JSON_To_MultiTree(temp, &tree))
@@ -151,10 +150,9 @@ void twinCallback(
 	    const void * value = NULL;
             if (MULTITREE_OK == MultiTree_GetLeafValue(child, "interval", &value))
             {
-                printf("interval  value is : %x\r\n", *(int *)value);
-		printf("Address is 0x%x", (int *)value);
-            }
-        }
+		printf("interval is %d\r\n", atoi((const char *)value));
+     	    }  
+	}
     }
     MultiTree_Destroy(tree);
     free(temp);
