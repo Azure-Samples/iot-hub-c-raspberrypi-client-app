@@ -130,12 +130,11 @@ int deviceMethodCallback(
 
 void twinCallback(
     DEVICE_TWIN_UPDATE_STATE updateState,
-    const unsigned char * payLoad,
+    const unsigned char *payLoad,
     size_t size,
-    void * userContextCallback
-)
+    void *userContextCallback)
 {
-    char * temp = (char *)malloc(size + 1);
+    char *temp = (char *)malloc(size + 1);
     for (int i = 0; i < size; i++)
     {
         temp[i] = (char)(payLoad[i]);
@@ -147,14 +146,15 @@ void twinCallback(
     {
         MULTITREE_HANDLE child = NULL;
 
-        if (MULTITREE_OK == MultiTree_GetChildByName(tree, "desired", &child))
+        if (MULTITREE_OK != MultiTree_GetChildByName(tree, "desired", &child))
         {
-	        const void * value = NULL;
-            if (MULTITREE_OK == MultiTree_GetLeafValue(child, "interval", &value))
-            {
-		        interval = atoi((const char *)value);
-     	    }  
-	}
+            child = tree;
+        }
+        const void *value = NULL;
+        if (MULTITREE_OK == MultiTree_GetLeafValue(child, "interval", &value))
+        {
+            interval = atoi((const char *)value);
+        }
     }
     MultiTree_Destroy(tree);
     free(temp);
