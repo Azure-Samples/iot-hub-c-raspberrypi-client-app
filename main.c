@@ -23,6 +23,8 @@ const char *notFound = "\"No method found\"";
 static bool messagePending = false;
 static bool sendingMessage = true;
 
+static int interval = INTERVAL;
+
 static void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
     if (IOTHUB_CLIENT_CONFIRMATION_OK == result)
@@ -147,10 +149,10 @@ void twinCallback(
 
         if (MULTITREE_OK == MultiTree_GetChildByName(tree, "desired", &child))
         {
-	    const void * value = NULL;
+	        const void * value = NULL;
             if (MULTITREE_OK == MultiTree_GetLeafValue(child, "interval", &value))
             {
-		printf("interval is %d\r\n", atoi((const char *)value));
+		        interval = atoi((const char *)value);
      	    }  
 	}
     }
@@ -322,7 +324,7 @@ int main(int argc, char *argv[])
                             (void)printf("Failed to read message\r\n");
                         }
                     }
-                    delay(INTERVAL);
+                    delay(interval);
                 }
                 IoTHubClient_LL_DoWork(iotHubClientHandle);
             }
