@@ -148,6 +148,7 @@ void twinCallback(
 
         if (MULTITREE_OK != MultiTree_GetChildByName(tree, "desired", &child))
         {
+            LogInfo("This device twin message contains desired message only\r\n");
             child = tree;
         }
         const void *value = NULL;
