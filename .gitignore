@@ -8,6 +8,16 @@
 *.gch
 *.pch
 
+# vim temp
+*.swp
+
+#cmake file
+CMakeCache.txt
+CMakeFiles/
+Makefile
+app
+cmake_install.cmake
+
 # Libraries
 *.lib
 *.a
