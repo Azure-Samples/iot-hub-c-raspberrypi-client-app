@@ -14,8 +14,10 @@
 #include <iothub_message.h>
 #include <iothubtransportmqtt.h>
 #include <jsondecoder.h>
+#include <pthread.h>
 #include "./config.h"
 #include "./wiring.h"
+#include "./telemetry.h"
 
 const char *onSuccess = "\"Successfully invoke device method\"";
 const char *notFound = "\"No method found\"";
@@ -257,14 +259,38 @@ static bool setX509Certificate(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char 
     return true;
 }
 
-int main(int argc, char *argv[])
+char *parse_iothub_name(char *connectionString)
 {
+    char *hostName = strtok(connectionString, ".");
+    int prefixLen = strlen("HostName=");
+    int len = strlen(hostName) - prefixLen + 1;
+    char *iotHubName = (char *)malloc(len);
+    memcpy(iotHubName, hostName + prefixLen, strlen(hostName) - prefixLen);
+    iotHubName[len - 1] = '\0';
+    return iotHubName;
+}
+
+typedef struct AiParams
+{
+    char *iotHubName;
+    char *event;
+    char *message;
+} AiParams;
+
+void *send_ai(void *argv)
+{
+    AiParams *params = argv;
+    send_telemetry_data(params->iotHubName, params->event, params->message);
+}
+
+int main(int argc, char *argv[])
+{    
     if (argc < 2)
     {
         LogError("Usage: %s <IoT hub device connection string>", argv[0]);
         return 1;
     }
-
+    
     setupWiring();
 
     char device_id[257];
@@ -287,7 +313,7 @@ int main(int argc, char *argv[])
     else
     {
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(argv[1], MQTT_Protocol)) == NULL)
-        {
+        {            
             LogError("iotHubClientHandle is NULL!");
         }
         else
@@ -307,6 +333,17 @@ int main(int argc, char *argv[])
             IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, twinCallback, NULL);
 
             int count = 0;
+            char *iotHubName = parse_iothub_name(argv[1]);
+            pthread_t thread;
+
+            struct AiParams *params;
+            params = malloc(sizeof(AiParams));
+            params->iotHubName = iotHubName;
+            params->event = "Create";
+            params->message = "IoT hub established";
+
+            pthread_create(&thread, NULL, send_ai, (void *)params);
+
             while (true)
             {
                 if (sendingMessage && !messagePending)
