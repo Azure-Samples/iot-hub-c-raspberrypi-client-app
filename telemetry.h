@@ -15,9 +15,10 @@
 #include <netdb.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+#include <unistd.h>
 
 void send_telemetry_data(const char *iotHubName, const char *event, const char *message);
-void get_mac_address_hash(char outputBuffer[65]);
-void sha256(const char *str, char outputBuffer[65]);
+void get_mac_address_hash(char outputBuffer[]);
+void sha256(const char *str, char outputBuffer[]);
 
 #endif  // TELEMETRY_H_

@@ -265,7 +265,11 @@ char *parse_iothub_name(char *connectionString)
     int prefixLen = strlen("HostName=");
     int len = strlen(hostName) - prefixLen + 1;
     char *iotHubName = (char *)malloc(len);
-    memcpy(iotHubName, hostName + prefixLen, strlen(hostName) - prefixLen);
+    if (iotHubName == NULL)
+    {
+        return NULL;
+    }
+    memcpy(iotHubName, hostName + prefixLen, len - 1);
     iotHubName[len - 1] = '\0';
     return iotHubName;
 }
@@ -281,6 +285,8 @@ void *send_ai(void *argv)
 {
     AiParams *params = argv;
     send_telemetry_data(params->iotHubName, params->event, params->message);
+    free(params->iotHubName);
+    free(params);
 }
 
 int main(int argc, char *argv[])
@@ -334,15 +340,18 @@ int main(int argc, char *argv[])
 
             int count = 0;
             char *iotHubName = parse_iothub_name(argv[1]);
-            pthread_t thread;
-
-            struct AiParams *params;
-            params = malloc(sizeof(AiParams));
-            params->iotHubName = iotHubName;
-            params->event = "Create";
-            params->message = "IoT hub established";
-
-            pthread_create(&thread, NULL, send_ai, (void *)params);
+            if (iotHubName != NULL)
+            {
+                pthread_t thread;
+                struct AiParams *params = malloc(sizeof(AiParams));
+                if (params != NULL)
+                {
+                    params->iotHubName = iotHubName;
+                    params->event = "Create";
+                    params->message = "IoT hub established";
+                    pthread_create(&thread, NULL, send_ai, (void *)params);
+                }
+            }
 
             while (true)
             {

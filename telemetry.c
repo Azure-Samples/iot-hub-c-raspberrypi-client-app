@@ -10,6 +10,7 @@ static const char *DEVICE_TYPE = "Raspberry Pi C SDK";
 static const char *VERSION = "Raspberry Pi 3";
 static const char *MCU = "STM32F412";
 static const char *MAC_TEMPLATE = "%02X-%02X-%02X-%02X-%02X-%02X";
+static const int HASH_LEN = 65;
 static const char *BODY_TEMPLATE =
 "{"
     "\"data\": {"
@@ -31,12 +32,11 @@ static const char *BODY_TEMPLATE =
     "\"iKey\": \"%s\""
 "}";
 
-void get_mac_address_hash(char outputBuffer[65])
+void get_mac_address_hash(char outputBuffer[])
 {
     struct ifreq s;
     int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 
-    // strcpy(s.ifr_name, "eth0");
     snprintf(s.ifr_name, sizeof(s.ifr_name), "eth0");
     if (0 == ioctl(fd, SIOCGIFHWADDR, &s))
     {
@@ -49,9 +49,11 @@ void get_mac_address_hash(char outputBuffer[65])
 
         sha256(mac, outputBuffer);
     }
+
+    close(fd);
 }
 
-void sha256(const char *str, char outputBuffer[65])
+void sha256(const char *str, char outputBuffer[])
 {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_CTX sha256;
@@ -64,7 +66,7 @@ void sha256(const char *str, char outputBuffer[65])
         snprintf(outputBuffer + (i * 2), sizeof(outputBuffer), "%02x", hash[i]);
     }
 
-    outputBuffer[64] = 0;
+    outputBuffer[HASH_LEN - 1] = 0;
 }
 
 void send_telemetry_data(const char *iotHubName, const char *event, const char *message)
@@ -79,8 +81,8 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
     {
         curl_easy_setopt(curl, CURLOPT_URL, PATH);
 
-        char hash_mac[65];
-        unsigned char hash_iothub_name[65];
+        char hash_mac[HASH_LEN];
+        unsigned char hash_iothub_name[HASH_LEN];
         get_mac_address_hash(hash_mac);
         sha256(iotHubName, hash_iothub_name);
 
@@ -93,21 +95,23 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
              + strlen(IKEY) - 20 + strlen(hash_iothub_name) + strlen(hash_mac)
              + strlen(message) + strlen(event) + tlen + 1;
         char *data = (char *)malloc(size * sizeof(char));
+        if (data != NULL)
+        {
+            snprintf(data, size, BODY_TEMPLATE, DEVICE_TYPE, VERSION, MCU, message, hash_mac, hash_iothub_name,
+                event, _ctime, EVENT, IKEY);
 
-        snprintf(data, size, BODY_TEMPLATE, DEVICE_TYPE, VERSION, MCU, message, hash_mac, hash_iothub_name,
-            event, _ctime, EVENT, IKEY);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+            // hide curl output
+            FILE *devnull = fopen("/dev/null", "w+");
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, devnull);
 
-        // hide curl output
-        FILE *devnull = fopen("/dev/null", "w+");
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, devnull);
+            res = curl_easy_perform(curl);
+            fclose(devnull);
 
-        res = curl_easy_perform(curl);
-        fclose(devnull);
+            curl_easy_cleanup(curl);
 
-        curl_easy_cleanup(curl);
-
-        free(data);
+            free(data);
+        }
     }
 }
