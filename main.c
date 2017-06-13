@@ -27,6 +27,9 @@ static bool sendingMessage = true;
 
 static int interval = INTERVAL;
 
+static const char *EVENT_NAME = "Create";
+static const char *MESSAGE = "IoT hub established";
+
 static void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
     if (IOTHUB_CLIENT_CONFIRMATION_OK == result)
@@ -274,16 +277,16 @@ char *parse_iothub_name(char *connectionString)
     return iotHubName;
 }
 
-typedef struct AiParams
+typedef struct AIParams
 {
     char *iotHubName;
-    char *event;
-    char *message;
-} AiParams;
+    const char *event;
+    const char *message;
+} AIParams;
 
 void *send_ai(void *argv)
 {
-    AiParams *params = argv;
+    AIParams *params = argv;
     send_telemetry_data(params->iotHubName, params->event, params->message);
     free(params->iotHubName);
     free(params);
@@ -343,13 +346,17 @@ int main(int argc, char *argv[])
             if (iotHubName != NULL)
             {
                 pthread_t thread;
-                struct AiParams *params = malloc(sizeof(AiParams));
+                AIParams *params = malloc(sizeof(AIParams));
                 if (params != NULL)
                 {
                     params->iotHubName = iotHubName;
-                    params->event = "Create";
-                    params->message = "IoT hub established";
+                    params->event = EVENT_NAME;
+                    params->message = MESSAGE;
                     pthread_create(&thread, NULL, send_ai, (void *)params);
+                }
+                else
+                {
+                    free(iotHubName);
                 }
             }
 

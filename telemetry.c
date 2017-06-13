@@ -87,9 +87,9 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
         sha256(iotHubName, hash_iothub_name);
 
         time_t t = time(NULL);
-        char *_ctime = ctime(&t);
-        int tlen = strlen(_ctime) - 1;
-        _ctime[tlen] = 0;
+        char *cur_time = ctime(&t);
+        int tlen = strlen(cur_time) - 1;
+        cur_time[tlen] = 0;
 
         int size = strlen(BODY_TEMPLATE) + strlen(DEVICE_TYPE) + strlen(VERSION) + strlen(MCU) + strlen(EVENT)
              + strlen(IKEY) - 20 + strlen(hash_iothub_name) + strlen(hash_mac)
@@ -98,7 +98,7 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
         if (data != NULL)
         {
             snprintf(data, size, BODY_TEMPLATE, DEVICE_TYPE, VERSION, MCU, message, hash_mac, hash_iothub_name,
-                event, _ctime, EVENT, IKEY);
+                event, cur_time, EVENT, IKEY);
 
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
