@@ -284,13 +284,13 @@ void *send_ai(void *argv)
 }
 
 int main(int argc, char *argv[])
-{    
+{
     if (argc < 2)
     {
         LogError("Usage: %s <IoT hub device connection string>", argv[0]);
         return 1;
     }
-    
+
     setupWiring();
 
     char device_id[257];
@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
     else
     {
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(argv[1], MQTT_Protocol)) == NULL)
-        {            
+        {
             LogError("iotHubClientHandle is NULL!");
         }
         else
