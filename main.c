@@ -27,8 +27,10 @@ static bool sendingMessage = true;
 
 static int interval = INTERVAL;
 
-static const char *EVENT_NAME = "Create";
-static const char *MESSAGE = "IoT hub established";
+static const char *EVENT_SUCCESS = "success";
+static const char *EVENT_FAILED = "failed";
+
+pthread_t thread;
 
 static void sendCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *userContextCallback)
 {
@@ -264,6 +266,11 @@ static bool setX509Certificate(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, char 
 
 char *parse_iothub_name(char *connectionString)
 {
+    if (connectionString == NULL)
+    {
+        return NULL;
+    }
+
     char *hostName = strtok(connectionString, ".");
     int prefixLen = strlen("HostName=");
     int len = strlen(hostName) - prefixLen + 1;
@@ -292,11 +299,29 @@ void *send_ai(void *argv)
     free(params);
 }
 
+void *send_ai_message(char *iotHubName, const char *eventName, const char *message)
+{
+    AIParams *params = malloc(sizeof(AIParams));
+    if (params != NULL)
+    {
+        params->iotHubName = iotHubName;
+        params->event = eventName;
+        params->message = message;
+        pthread_create(&thread, NULL, send_ai, (void *)params);
+    }
+    else
+    {
+        free(iotHubName);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
         LogError("Usage: %s <IoT hub device connection string>", argv[0]);
+        send_ai_message(NULL, EVENT_FAILED, "Device connection string is not provided");
+        pthread_join(thread, NULL);
         return 1;
     }
 
@@ -308,8 +333,11 @@ int main(int argc, char *argv[])
     if (device_id_src == NULL)
     {
         LogError("Cannot parse device id from IoT device connection string");
+        send_ai_message(NULL, EVENT_FAILED, "Cannot parse device id from connection string");
+        pthread_join(thread, NULL);
         return 1;
     }
+
     snprintf(device_id, sizeof(device_id), "%s", device_id_src);
     free(device_id_src);
 
@@ -318,12 +346,16 @@ int main(int argc, char *argv[])
     if (platform_init() != 0)
     {
         LogError("Failed to initialize the platform.");
+        send_ai_message(NULL, EVENT_FAILED, "Failed to initialize the platform.");
+        pthread_join(thread, NULL);
     }
     else
     {
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(argv[1], MQTT_Protocol)) == NULL)
         {
             LogError("iotHubClientHandle is NULL!");
+            send_ai_message(NULL, EVENT_FAILED, "Cannot create iotHubClientHandle");
+            pthread_join(thread, NULL);
         }
         else
         {
@@ -332,6 +364,8 @@ int main(int argc, char *argv[])
                 // Use X.509 certificate authentication.
                 if (!setX509Certificate(iotHubClientHandle, device_id))
                 {
+                    send_ai_message(NULL, EVENT_FAILED, "Certificate is not right");
+                    pthread_join(thread, NULL);
                     return 1;
                 }
             }
@@ -341,25 +375,9 @@ int main(int argc, char *argv[])
             IoTHubClient_LL_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
             IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, twinCallback, NULL);
 
-            int count = 0;
             char *iotHubName = parse_iothub_name(argv[1]);
-            if (iotHubName != NULL)
-            {
-                pthread_t thread;
-                AIParams *params = malloc(sizeof(AIParams));
-                if (params != NULL)
-                {
-                    params->iotHubName = iotHubName;
-                    params->event = EVENT_NAME;
-                    params->message = MESSAGE;
-                    pthread_create(&thread, NULL, send_ai, (void *)params);
-                }
-                else
-                {
-                    free(iotHubName);
-                }
-            }
-
+            send_ai_message(iotHubName, EVENT_SUCCESS, "IoT hub connection is established");
+            int count = 0;
             while (true)
             {
                 if (sendingMessage && !messagePending)
