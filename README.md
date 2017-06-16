@@ -35,7 +35,7 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FDA6A393E4C2257F
 sudo apt-get update
 sudo apt-get install -y azure-iot-sdk-c-dev cmake libcurl4-openssl-dev git-core
 git clone git://git.drogon.net/wiringPi
-cd ~/wiringPi
+cd ./wiringPi
 ./build
 ```
 ### Build the sample code

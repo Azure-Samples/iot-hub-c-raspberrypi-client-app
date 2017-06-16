@@ -299,7 +299,7 @@ void *send_ai(void *argv)
     free(params);
 }
 
-void *send_ai_message(char *iotHubName, const char *eventName, const char *message)
+void *send_telemetry_data_multi_thread(char *iotHubName, const char *eventName, const char *message)
 {
     AIParams *params = malloc(sizeof(AIParams));
     if (params != NULL)
@@ -320,8 +320,7 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         LogError("Usage: %s <IoT hub device connection string>", argv[0]);
-        send_ai_message(NULL, EVENT_FAILED, "Device connection string is not provided");
-        pthread_join(thread, NULL);
+        send_telemetry_data(NULL, EVENT_FAILED, "Device connection string is not provided");
         return 1;
     }
 
@@ -333,7 +332,7 @@ int main(int argc, char *argv[])
     if (device_id_src == NULL)
     {
         LogError("Cannot parse device id from IoT device connection string");
-        send_ai_message(NULL, EVENT_FAILED, "Cannot parse device id from connection string");
+        send_telemetry_data(NULL, EVENT_FAILED, "Cannot parse device id from connection string");
         pthread_join(thread, NULL);
         return 1;
     }
@@ -346,16 +345,14 @@ int main(int argc, char *argv[])
     if (platform_init() != 0)
     {
         LogError("Failed to initialize the platform.");
-        send_ai_message(NULL, EVENT_FAILED, "Failed to initialize the platform.");
-        pthread_join(thread, NULL);
+        send_telemetry_data(NULL, EVENT_FAILED, "Failed to initialize the platform.");
     }
     else
     {
         if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(argv[1], MQTT_Protocol)) == NULL)
         {
             LogError("iotHubClientHandle is NULL!");
-            send_ai_message(NULL, EVENT_FAILED, "Cannot create iotHubClientHandle");
-            pthread_join(thread, NULL);
+            send_telemetry_data(NULL, EVENT_FAILED, "Cannot create iotHubClientHandle");
         }
         else
         {
@@ -364,8 +361,7 @@ int main(int argc, char *argv[])
                 // Use X.509 certificate authentication.
                 if (!setX509Certificate(iotHubClientHandle, device_id))
                 {
-                    send_ai_message(NULL, EVENT_FAILED, "Certificate is not right");
-                    pthread_join(thread, NULL);
+                    send_telemetry_data(NULL, EVENT_FAILED, "Certificate is not right");
                     return 1;
                 }
             }
@@ -376,7 +372,7 @@ int main(int argc, char *argv[])
             IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, twinCallback, NULL);
 
             char *iotHubName = parse_iothub_name(argv[1]);
-            send_ai_message(iotHubName, EVENT_SUCCESS, "IoT hub connection is established");
+            send_telemetry_data_multi_thread(iotHubName, EVENT_SUCCESS, "IoT hub connection is established");
             int count = 0;
             while (true)
             {
