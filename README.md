@@ -10,7 +10,7 @@ This repo contains an arduino application that runs on Raspberry Pi 3 with a BME
 Follow [this page](https://www.raspberrypi.org/documentation/remote-access/ssh/) to enable SSH on your Pi.
 
 ### Enable SPI on your Pi
-Follow [this page]https://www.raspberrypi.org/documentation/configuration/raspi-config.md) to enable SPI on your Pi
+Follow [this page](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) to enable SPI on your Pi
 
 ## Connect your sensor with your Pi
 ### Connect with a physical BEM280 sensor and LED
