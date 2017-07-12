@@ -33,7 +33,10 @@ grep -q -F 'deb http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid
 grep -q -F 'deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' /etc/apt/sources.list || sudo sh -c "echo 'deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main' >> /etc/apt/sources.list"
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FDA6A393E4C2257F
 sudo apt-get update
-sudo apt-get install -y azure-iot-sdk-c-dev cmake
+sudo apt-get install -y azure-iot-sdk-c-dev cmake libcurl4-openssl-dev git-core
+git clone git://git.drogon.net/wiringPi
+cd ./wiringPi
+./build
 ```
 ### Build the sample code
 Build the sample code by the following command:
