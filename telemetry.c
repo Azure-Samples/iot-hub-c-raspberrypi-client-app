@@ -101,7 +101,7 @@ int substr_count(const char * str, const char * substr)
     while (tmp = strstr(tmp, substr))
     {
         count++;
-        tmp++;
+        tmp += strlen(substr);
     }
     return count;
 }
@@ -135,8 +135,7 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
         exec_command("/usr/bin/lsb_release -r| grep -oP \'\\d\\.\\d\' | tr -d \'\\r\\n\'", os_release);
         exec_command("cat /etc/os-release | grep -oP \'^ID_LIKE=.*$\' | tr -d \'\\r\\n\'", os_platform);
         int str_placeholder_count = substr_count(BODY_TEMPLATE, "%s");
-
-        int platform_str_offset =  strlen("ID_LIKE=");
+        int platform_str_offset =  strlen(prefix);
         int size = strlen(BODY_TEMPLATE) + strlen(LANGUAGE) + strlen(DEVICE) + strlen(MCU) + strlen(EVENT)
              + strlen(IKEY) - strlen("%s") * str_placeholder_count + strlen(hash_iothub_name)
              + strlen(hash_mac) + strlen(platform.sysname) + strlen(os_platform + platform_str_offset)
