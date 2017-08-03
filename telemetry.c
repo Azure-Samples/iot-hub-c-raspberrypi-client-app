@@ -94,6 +94,18 @@ void exec_command(char command [], char result [])
     }
 }
 
+int substr_count(const char * str, const char * substr)
+{
+    const char *tmp = str;
+    int count = 0;
+    while (tmp = strstr(tmp, substr))
+    {
+        count++;
+        tmp++;
+    }
+    return count;
+}
+
 void send_telemetry_data(const char *iotHubName, const char *event, const char *message)
 {
     CURL *curl;
@@ -116,20 +128,24 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
         cur_time[tlen] = 0;
 
         uname(&platform);
-        char osRelease[10];
-        char osPlatform[20];
+        char os_release[LINE_BUFSIZE];
+        char os_platform[LINE_BUFSIZE];
+        const char prefix[] = "ID_LIKE=";
 
-        exec_command("/usr/bin/lsb_release -r| grep -oP \'\\d\\.\\d\' | tr -d \'\\r\\n\'", osRelease);
-        exec_command("cat /etc/os-release | grep -oP \'^ID_LIKE=.*$\' | tr -d \'\\r\\n\'", osPlatform);
+        exec_command("/usr/bin/lsb_release -r| grep -oP \'\\d\\.\\d\' | tr -d \'\\r\\n\'", os_release);
+        exec_command("cat /etc/os-release | grep -oP \'^ID_LIKE=.*$\' | tr -d \'\\r\\n\'", os_platform);
+        int str_placeholder_count = substr_count(BODY_TEMPLATE, "%s");
 
+        int platform_str_offset =  strlen("ID_LIKE=");
         int size = strlen(BODY_TEMPLATE) + strlen(LANGUAGE) + strlen(DEVICE) + strlen(MCU) + strlen(EVENT)
-             + strlen(IKEY) - strlen("%s") * 13 + strlen(hash_iothub_name) + strlen(hash_mac) + strlen(platform.sysname)
-             + strlen(osPlatform + strlen("ID_LIKE=")) + strlen(osRelease) + strlen(message) + strlen(event) + tlen + 1;
+             + strlen(IKEY) - strlen("%s") * str_placeholder_count + strlen(hash_iothub_name)
+             + strlen(hash_mac) + strlen(platform.sysname) + strlen(os_platform + platform_str_offset)
+             + strlen(os_release) + strlen(message) + strlen(event) + tlen + 1;
         char *data = (char *)malloc(size * sizeof(char));
         if (data != NULL)
         {
             snprintf(data, size, BODY_TEMPLATE, LANGUAGE, DEVICE, MCU, message, hash_mac, hash_iothub_name,
-                platform.sysname, osPlatform + strlen("ID_LIKE="), osRelease, event, cur_time, EVENT, IKEY);
+                platform.sysname, os_platform + platform_str_offset, os_release, event, cur_time, EVENT, IKEY);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
             // hide curl output
             FILE *devnull = fopen("/dev/null", "w+");
