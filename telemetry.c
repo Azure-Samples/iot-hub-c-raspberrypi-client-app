@@ -3,6 +3,7 @@
 */
 #include "./telemetry.h"
 
+static struct utsname platform;
 static const char *PATH = "https://dc.services.visualstudio.com/v2/track";
 static const char *IKEY = "0823bae8-a3b8-4fd5-80e5-f7272a2377a9";
 static const char *EVENT = "AIEVENT";
@@ -20,9 +21,12 @@ static const char *BODY_TEMPLATE =
                 "\"language\": \"%s\","
                 "\"device\": \"%s\","
                 "\"mcu\": \"%s\","
-                "\"message\":\"%s\","
+                "\"message\": \"%s\","
                 "\"mac\": \"%s\","
-                "\"iothub\":\"%s\""
+                "\"iothub\": \"%s\","
+                "\"osType\": \"%s\","
+                "\"osPlatform\": \"%s\","
+                "\"osRelease\": \"%s\""
             "},"
             "\"name\": \"%s\""
         "}"
@@ -74,6 +78,22 @@ void sha256(const char *str, char outputBuffer[])
     outputBuffer[HASH_LEN - 1] = 0;
 }
 
+void exec_command(char command [], char result [])
+{
+    FILE * pipe = popen(command, "r");
+    if (pipe == NULL)
+    {
+        result = "unknown";
+        return;
+    }
+
+    fgets(result, LINE_BUFSIZE, pipe);
+    if (strlen(result) == 0)
+    {
+        result = "unknown";
+    }
+}
+
 void send_telemetry_data(const char *iotHubName, const char *event, const char *message)
 {
     CURL *curl;
@@ -95,14 +115,21 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
         int tlen = strlen(cur_time) - 1;
         cur_time[tlen] = 0;
 
+        uname(&platform);
+        char osRelease[10];
+        char osPlatform[20];
+
+        exec_command("/usr/bin/lsb_release -r| grep -oP \'\\d\\.\\d\' | tr -d \'\\r\\n\'", osRelease);
+        exec_command("cat /etc/os-release | grep -oP \'^ID_LIKE=.*$\' | tr -d \'\\r\\n\'", osPlatform);
+
         int size = strlen(BODY_TEMPLATE) + strlen(LANGUAGE) + strlen(DEVICE) + strlen(MCU) + strlen(EVENT)
-             + strlen(IKEY) - 20 + strlen(hash_iothub_name) + strlen(hash_mac)
-             + strlen(message) + strlen(event) + tlen + 1;
+             + strlen(IKEY) - strlen("%s") * 13 + strlen(hash_iothub_name) + strlen(hash_mac) + strlen(platform.sysname)
+             + strlen(osPlatform + strlen("ID_LIKE=")) + strlen(osRelease) + strlen(message) + strlen(event) + tlen + 1;
         char *data = (char *)malloc(size * sizeof(char));
         if (data != NULL)
         {
             snprintf(data, size, BODY_TEMPLATE, LANGUAGE, DEVICE, MCU, message, hash_mac, hash_iothub_name,
-                event, cur_time, EVENT, IKEY);
+                platform.sysname, osPlatform + strlen("ID_LIKE="), osRelease, event, cur_time, EVENT, IKEY);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
             // hide curl output
             FILE *devnull = fopen("/dev/null", "w+");
