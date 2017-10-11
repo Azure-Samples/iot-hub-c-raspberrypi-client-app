@@ -36,7 +36,7 @@ static const char *BODY_TEMPLATE =
     "\"iKey\": \"%s\""
 "}";
 
-void get_mac_address_hash(char outputBuffer[])
+void get_mac_address_hash(char outputBuffer[], int len)
 {
     struct ifreq s;
     int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -51,13 +51,13 @@ void get_mac_address_hash(char outputBuffer[])
             (unsigned char)s.ifr_addr.sa_data[5]);
         mac[17] = '\n';
 
-        sha256(mac, outputBuffer);
+        sha256(mac, outputBuffer, len);
     }
 
     close(fd);
 }
 
-void sha256(const char *str, char outputBuffer[])
+void sha256(const char *str, char outputBuffer[], int len)
 {
     if (str == NULL)
     {
@@ -72,7 +72,7 @@ void sha256(const char *str, char outputBuffer[])
     int i = 0;
     for (i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
-        snprintf(outputBuffer + (i * 2), sizeof(outputBuffer), "%02x", hash[i]);
+        snprintf(outputBuffer + (i * 2), len, "%02x", hash[i]);
     }
 
     outputBuffer[HASH_LEN - 1] = 0;
@@ -119,8 +119,8 @@ void send_telemetry_data(const char *iotHubName, const char *event, const char *
 
         char hash_mac[HASH_LEN];
         unsigned char hash_iothub_name[HASH_LEN];
-        get_mac_address_hash(hash_mac);
-        sha256(iotHubName, hash_iothub_name);
+        get_mac_address_hash(hash_mac, sizeof(hash_mac));
+        sha256(iotHubName, hash_iothub_name, sizeof(hash_iothub_name));
 
         time_t t = time(NULL);
         char *cur_time = ctime(&t);
