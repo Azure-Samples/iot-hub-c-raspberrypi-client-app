@@ -371,6 +371,8 @@ int main(int argc, char *argv[])
             IoTHubClient_LL_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
             IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientHandle, twinCallback, NULL);
 
+            IoTHubClient_LL_SetOption(iotHubClientHandle, "product_info", "HappyPath_RaspberryPi-C");
+
             char *iotHubName = parse_iothub_name(argv[1]);
             send_telemetry_data_multi_thread(iotHubName, EVENT_SUCCESS, "IoT hub connection is established");
             int count = 0;
