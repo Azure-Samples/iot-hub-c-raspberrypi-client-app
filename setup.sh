@@ -59,8 +59,8 @@ sudo apt-get install -y azure-iot-sdk-c-dev cmake libcurl4-openssl-dev
 
 git clone git://git.drogon.net/wiringPi
 cd ./wiringPi
-cd ..
 ./build
+cd ..
 
 
 if [[ $1 == "--simulated-data" ]]; then
