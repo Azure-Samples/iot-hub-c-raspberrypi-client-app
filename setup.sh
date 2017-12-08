@@ -73,8 +73,8 @@ fi
 
 git clone git://git.drogon.net/wiringPi
 cd ./wiringPi
-cd ..
 ./build
+cd ..
 
 
 if [[ $1 == "--simulated-data" ]]; then
