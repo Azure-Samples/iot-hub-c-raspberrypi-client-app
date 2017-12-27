@@ -1,7 +1,7 @@
 /*
 * IoT Hub Raspberry Pi C - Microsoft Sample Code - Copyright (c) 2017 - Licensed MIT
 */
-#include "telemetry.h"
+#include "./telemetry.h"
 
 static struct utsname platform;
 static const char *PATH = "https://dc.services.visualstudio.com/v2/track";
@@ -78,7 +78,7 @@ void initial_telemetry()
     }
     else
     {
-        printf(PROMPT_TEXT);
+        printf("%s", PROMPT_TEXT);
         char answer = getchar();
         file = fopen("telemetry.config", "w");
         if (answer == 'n')
@@ -208,7 +208,7 @@ void send_telemetry_data_without_sensitive_info(const char *event)
 
 void send_telemetry_data(const char *iotHubName, const char *event, const char *message)
 {
-    if(!enabled)
+    if (!enabled)
     {
         return;
     }
