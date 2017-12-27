@@ -25,5 +25,7 @@ void get_mac_address_hash(char outputBuffer[], int len);
 void sha256(const char *str, char outputBuffer[], int len);
 void exec_command(char command [], char result []);
 int substr_count(const char * str, const char * substr);
+void initial_telemetry();
+void send_telemetry_data_without_sensitive_info(const char *event);
 
 #endif  // TELEMETRY_H_

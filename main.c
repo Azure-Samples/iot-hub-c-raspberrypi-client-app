@@ -318,6 +318,7 @@ void *send_telemetry_data_multi_thread(char *iotHubName, const char *eventName, 
 
 int main(int argc, char *argv[])
 {
+    initial_telemetry();
     if (argc < 2)
     {
         LogError("Usage: %s <IoT hub device connection string>", argv[0]);
