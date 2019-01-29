@@ -43,8 +43,9 @@
 #define MAX_NESTING       2048
 
 #define FLOAT_FORMAT "%1.17g" /* do not increase precision without incresing NUM_BUF_SIZE */
-#define NUM_BUF_SIZE 64 /* double printed with "%1.17g" shouldn't be longer than 25 bytes so
-                         let's be paranoid and use 64 */
+#define NUM_BUF_SIZE 64 /* double printed with "%1.17g" shouldn't be longer than 25 bytes
+                         * so let's be paranoid and use 64 
+                         */
 
 #define SIZEOF_TOKEN(a)       (sizeof(a) - 1)
 #define SKIP_CHAR(str)        ((*str)++)
@@ -278,7 +279,7 @@ static char * read_file(const char * filename) {
     FILE *fp = fopen(filename, "r");
     size_t size_to_read = 0;
     size_t size_read = 0;
-    long pos;
+    int64 pos;
     char *file_contents;
     if (!fp) {
         return NULL;
@@ -324,7 +325,7 @@ static void remove_comments(char *string, const char *start_token, const char *e
         } else if (current_char == '\"' && !escaped) {
             in_string = !in_string;
         } else if (!in_string && strncmp(string, start_token, start_token_len) == 0) {
-            for(i = 0; i < start_token_len; i++) {
+            for (i = 0; i < start_token_len; i++) {
                 string[i] = ' ';
             }
             string = string + start_token_len;
@@ -647,7 +648,7 @@ static char* process_string(const char *input, size_t len) {
                     goto error;
             }
         } else if ((unsigned char)*input_ptr < 0x20) {
-            goto error; // 0x00-0x19 are invalid characters for json string (http://www.ietf.org/rfc/rfc4627.txt)
+            goto error;  // 0x00-0x19 are invalid characters for json string (http://www.ietf.org/rfc/rfc4627.txt)
         } else {
             *output_ptr = *input_ptr;
         }
@@ -868,12 +869,12 @@ static JSON_Value * parse_null_value(const char **string) {
 #define APPEND_STRING(str) do { written = append_string(buf, (str));\
                                 if (written < 0) { return -1; }\
                                 if (buf != NULL) { buf += written; }\
-                                written_total += written; } while(0)
+                                written_total += written; } while (0)
 
 #define APPEND_INDENT(level) do { written = append_indent(buf, (level));\
                                   if (written < 0) { return -1; }\
                                   if (buf != NULL) { buf += written; }\
-                                  written_total += written; } while(0)
+                                  written_total += written; } while (0)
 
 static int json_serialize_to_buffer_r(const JSON_Value *value, char *buf, int level, int is_pretty, char *num_buf)
 {
@@ -992,7 +993,7 @@ static int json_serialize_to_buffer_r(const JSON_Value *value, char *buf, int le
             if (buf != NULL) {
                 num_buf = buf;
             }
-            written = sprintf(num_buf, FLOAT_FORMAT, num);
+            written = snprintf(num_buf, FLOAT_FORMAT, num);
             if (written < 0) {
                 return -1;
             }
@@ -1091,7 +1092,7 @@ static int append_string(char *buf, const char *string) {
     if (buf == NULL) {
         return (int)strlen(string);
     }
-    return sprintf(buf, "%s", string);
+    return snprintf(buf, "%s", string);
 }
 
 #undef APPEND_STRING
@@ -1806,7 +1807,9 @@ JSON_Status json_object_dotset_value(JSON_Object *object, const char *name, JSON
     name_len = dot_pos - name;
     temp_value = json_object_getn_value(object, name, name_len);
     if (temp_value) {
-        /* Don't overwrite existing non-object (unlike json_object_set_value, but it shouldn't be changed at this point) */
+        /* Don't overwrite existing non-object (unlike json_object_set_value,
+         * but it shouldn't be changed at this point)
+         */
         if (json_value_get_type(temp_value) != JSONObject) {
             return JSONFailure;
         }
