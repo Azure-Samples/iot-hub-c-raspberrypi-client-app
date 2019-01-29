@@ -26,7 +26,7 @@
 #endif /* _CRT_SECURE_NO_WARNINGS */
 #endif /* _MSC_VER */
 
-#include "parson.h"
+#include "./parson.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +43,8 @@
 #define MAX_NESTING       2048
 
 #define FLOAT_FORMAT "%1.17g" /* do not increase precision without incresing NUM_BUF_SIZE */
-#define NUM_BUF_SIZE 64 /* double printed with "%1.17g" shouldn't be longer than 25 bytes so let's be paranoid and use 64 */
+#define NUM_BUF_SIZE 64 /* double printed with "%1.17g" shouldn't be longer than 25 bytes so
+                         let's be paranoid and use 64 */
 
 #define SIZEOF_TOKEN(a)       (sizeof(a) - 1)
 #define SKIP_CHAR(str)        ((*str)++)
@@ -646,7 +647,7 @@ static char* process_string(const char *input, size_t len) {
                     goto error;
             }
         } else if ((unsigned char)*input_ptr < 0x20) {
-            goto error; /* 0x00-0x19 are invalid characters for json string (http://www.ietf.org/rfc/rfc4627.txt) */
+            goto error; // 0x00-0x19 are invalid characters for json string (http://www.ietf.org/rfc/rfc4627.txt)
         } else {
             *output_ptr = *input_ptr;
         }
@@ -1224,7 +1225,7 @@ JSON_Value *json_object_get_wrapping_value(const JSON_Object *object) {
     return object->wrapping_value;
 }
 
-int json_object_has_value (const JSON_Object *object, const char *name) {
+int json_object_has_value(const JSON_Object *object, const char *name) {
     return json_object_get_value(object, name) != NULL;
 }
 
@@ -1233,7 +1234,7 @@ int json_object_has_value_of_type(const JSON_Object *object, const char *name, J
     return val != NULL && json_value_get_type(val) == type;
 }
 
-int json_object_dothas_value (const JSON_Object *object, const char *name) {
+int json_object_dothas_value(const JSON_Object *object, const char *name) {
     return json_object_dotget_value(object, name) != NULL;
 }
 
@@ -1303,7 +1304,7 @@ int json_value_get_boolean(const JSON_Value *value) {
     return json_value_get_type(value) == JSONBoolean ? value->value.boolean : -1;
 }
 
-JSON_Value * json_value_get_parent (const JSON_Value *value) {
+JSON_Value * json_value_get_parent(const JSON_Value *value) {
     return value ? value->parent : NULL;
 }
 
@@ -2028,19 +2029,19 @@ JSON_Value_Type json_type(const JSON_Value *value) {
     return json_value_get_type(value);
 }
 
-JSON_Object * json_object (const JSON_Value *value) {
+JSON_Object * json_object(const JSON_Value *value) {
     return json_value_get_object(value);
 }
 
-JSON_Array * json_array  (const JSON_Value *value) {
+JSON_Array * json_array(const JSON_Value *value) {
     return json_value_get_array(value);
 }
 
-const char * json_string (const JSON_Value *value) {
+const char * json_string(const JSON_Value *value) {
     return json_value_get_string(value);
 }
 
-double json_number (const JSON_Value *value) {
+double json_number(const JSON_Value *value) {
     return json_value_get_number(value);
 }
 
