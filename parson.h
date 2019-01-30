@@ -236,4 +236,4 @@ int             json_boolean(const JSON_Value *value);
 }
 #endif
 
-#endif // PARSON_H_
+#endif  // PARSON_H_

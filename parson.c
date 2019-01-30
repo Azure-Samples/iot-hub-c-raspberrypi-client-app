@@ -279,7 +279,7 @@ static char * read_file(const char * filename) {
     FILE *fp = fopen(filename, "r");
     size_t size_to_read = 0;
     size_t size_read = 0;
-    int64 pos;
+    int64_t pos;
     char *file_contents;
     if (!fp) {
         return NULL;
@@ -993,7 +993,7 @@ static int json_serialize_to_buffer_r(const JSON_Value *value, char *buf, int le
             if (buf != NULL) {
                 num_buf = buf;
             }
-            written = snprintf(num_buf, FLOAT_FORMAT, num);
+            written = sprintf(num_buf, FLOAT_FORMAT, num);
             if (written < 0) {
                 return -1;
             }
