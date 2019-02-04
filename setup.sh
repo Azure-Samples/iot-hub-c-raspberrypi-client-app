@@ -76,6 +76,11 @@ cd ./wiringPi
 ./build
 cd ..
 
+git clone https://github.com/kgabis/parson.git
+cd ./parson
+mv parson.c parson.h ..
+cd ..
+rm -rf parson
 
 if [[ $1 == "--simulated-data" ]]; then
     echo -e "Using simulated data"
