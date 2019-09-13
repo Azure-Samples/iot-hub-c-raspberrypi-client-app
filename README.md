@@ -1,7 +1,11 @@
 ---
-services: iot-hub
-platforms: C
-author: shizn
+page_type: sample
+languages:
+- c
+products:
+- azure
+description: "This repo contains an arduino application that runs on Raspberry Pi 3 with a BME280 temperature&humidity sensor,"
+urlFragment: iot-hub-c-raspberrypi-client-app
 ---
 
 # IoT Hub Raspberry Pi 3 Client application
