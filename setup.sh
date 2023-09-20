@@ -12,7 +12,7 @@ git clone --recursive https://github.com/azure/azure-iot-sdk-c.git
 cd azure-iot-sdk-c/build_all/linux
 ./build.sh --no-make
 
-cd ../../cmake/iotsdk_linux
+cd ../../cmake
 make
 
 sudo make install
